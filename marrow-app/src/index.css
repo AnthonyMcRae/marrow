@@ -1,0 +1,5 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: #131119; }
+#root { min-height: 100vh; display: flex; }
+#root > .mrw { flex: 1; }
