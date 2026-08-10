@@ -283,7 +283,11 @@ async function callClaude(prompt, maxTokens = 3000, timeoutMs = 120000) {
         messages: [{ role: "user", content: prompt }],
       }),
     });
-    if (!res.ok) throw new Error("The model couldn't be reached (" + res.status + "). Try again in a moment.");
+    if (!res.ok) {
+      let detail = "";
+      try { const j = await res.json(); detail = (j && (j.error?.message || j.error)) || ""; } catch (e) {}
+      throw new Error("Claude request failed (" + res.status + ")" + (detail ? ": " + detail : "") + ".");
+    }
     const data = await res.json();
     return (data.content || []).map((b) => (b.type === "text" ? b.text : "")).join("").trim();
   } catch (e) {
