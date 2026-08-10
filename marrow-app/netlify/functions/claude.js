@@ -12,6 +12,11 @@ export const handler = async (event) => {
     };
   }
   try {
+    // Netlify sometimes delivers the POST body base64-encoded; decode it if so,
+    // otherwise Anthropic receives scrambled JSON and returns a 400.
+    const body = event.isBase64Encoded
+      ? Buffer.from(event.body || "", "base64").toString("utf8")
+      : (event.body || "");
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -19,7 +24,7 @@ export const handler = async (event) => {
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
       },
-      body: event.body, // { model, max_tokens, messages } forwarded verbatim
+      body, // { model, max_tokens, messages } forwarded verbatim
     });
     const text = await r.text();
     return { statusCode: r.status, headers: { "content-type": "application/json" }, body: text };
